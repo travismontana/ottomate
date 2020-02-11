@@ -4,13 +4,14 @@ package main
 
 import (
 	"encoding/xml"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
 )
 
-var debugenabled bool = false
+var debugenabled bool
 
 /*
  * Error 1: missing filename for the xml file
@@ -82,7 +83,16 @@ type ConnectionSt struct {
 }
 
 func main() {
+	/*
+	 * Work on command line stuff first
+	 */
+	debug := flag.Bool("d", false, "Adds debugging")
+
 	var xmlfilename string
+	flag.StringVar(&xmlfilename, "f", "", "XML File")
+	flag.Parse()
+	fmt.Println("Debug:", *debug)
+	debugenabled = *debug
 
 	type RouterSVISt struct {
 		Label       string
@@ -109,12 +119,14 @@ func main() {
 	var RouterSVIList []RouterSVISt
 	var ConnectList []ConnectSt
 
-	if len(os.Args) < 2 {
-		errorIt("Missing Filename", 1)
-	} else {
-		xmlfilename = os.Args[1]
-		debugIt("Filename: " + xmlfilename)
-	}
+	/*
+		if len(os.Args) < 2 {
+			errorIt("Missing Filename", 1)
+		} else {
+			xmlfilename = os.Args[1]
+			debugIt("Filename: " + xmlfilename)
+		}
+	*/
 
 	xmlFile, err := os.Open(xmlfilename)
 
