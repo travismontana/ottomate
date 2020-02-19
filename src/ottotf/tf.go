@@ -42,7 +42,8 @@ func WriteTF(labelname string,
 */
 
 func WriteTF(server map[string]string, outfile string, templatefile string) (err2 error){
-	templ := pongo.Must(pongo.FromFile(templatefile))
+  	fmt.Println("Template: "+templatefile)
+	var templ = pongo.Must(pongo.FromFile(templatefile))
 	w, err1 := os.Create(outfile)
 	if err1 != nil {
 		support.DebugIt("Error in WriteTF")
@@ -116,21 +117,15 @@ func RunTF(tffile string,servername string, user string, pass string){
 
 	CopyFile("/Users/nmrb126/.terraform.tfvars", tempdir+"/terraform.tfvars")
 
-	/*
-	var terraform_args1 string
-	//terraform_args1 = fmt.Sprintf("-var 'user=%s'", user)
-	terraform_args1 = "-var 'user="+user+"'"
-	var terraform_args2 string
-	//terraform_args2 = fmt.Sprintf("-var 'pass=%s'", pass)
-	terraform_args2 = "-var 'pass="+pass+"'"
-	 */
-	cmd2 := exec.Command("terraform", "plan")
+	os.Setenv("TF_VAR_user=",user)
+	os.Setenv("TF_VAR_pass=",pass)
+	cmd2 := exec.Command("terraform","plan")
 	out2, err2 := cmd2.CombinedOutput()
 	if err2 != nil {
 		fmt.Printf("combined out:\n%s\n", string(out2))
 		log.Fatalf("cmd.Run() failed with %s\n", err2)
 	}
-	fmt.Printf("combined out:\n%s\n", string(out2))
+	//fmt.Printf("combined out:\n%s\n", string(out2))
 
 //	Cleanup(tempdir)
 }

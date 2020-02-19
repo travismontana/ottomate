@@ -1,2 +1,0 @@
-# ottomate
-Ottomation for infrastructure.

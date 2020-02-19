@@ -23,6 +23,15 @@ func Getnetworkdeets(networkname string) (netname NetworkSt) {
 	Bitmask: "24",
 	Location: "SDE"}
 	PDCNetworkList = append(PDCNetworkList,tmp2)
+	
+	tmp3 := NetworkSt{
+	Name: "InfraTools",
+	VLANID: "135",
+	Gateway: "172.18.35.1",
+	Netmask: "255.255.255.0",
+	Bitmask: "24",
+	Location: "Corp"}
+ 	PDCNetworkList = append(PDCNetworkList,tmp3)
 
 	fmt.Println(len(PDCNetworkList))
 

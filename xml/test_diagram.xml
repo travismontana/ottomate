@@ -20,7 +20,7 @@
             <mxPoint x="414" y="220" as="sourcePoint"/>
           </mxGeometry>
         </mxCell>
-        <object label="corpentapps" nmgtype="routersvi" nmgname="corpentapps" id="UpcCP3XU3VUrwlTI6C_n-20">
+        <object label="InfraTools" nmgtype="routersvi" nmgname="InfraTools" id="UpcCP3XU3VUrwlTI6C_n-20">
           <mxCell style="image;html=1;labelBackgroundColor=#ffffff;image=img/lib/clip_art/networking/Router_Icon_128x128.png" vertex="1" parent="1">
             <mxGeometry x="214" y="70" width="80" height="80" as="geometry"/>
           </mxCell>
