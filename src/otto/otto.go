@@ -6,13 +6,13 @@ import (
 	"encoding/xml"
 	"flag"
 	"fmt"
+	"golang.org/x/crypto/ssh/terminal"
 	"io/ioutil"
 	"os"
 	"ottonet"
+	_ "ottonet"
 	"ottotf"
 	"support"
-	_ "ottonet"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 var debugenabled bool
@@ -49,15 +49,15 @@ type RootSt struct {
 
 // ObjectSt This is what contains what you want, unless you want the connection info which is in another castle.
 type ObjectSt struct {
-	XMLName xml.Name `xml:"object"`
-	Label   		string  `xml:"label,attr"`
-	Name    		string  `xml:"nmgname,attr"`
-	Type    		string  `xml:"nmgtype,attr"`
-	OSType  		string  `xml:"nmgostype,attr"`
-	ID      		string  `xml:"id,attr"`
-	NmgOrg			string	`xml:"nmgorg,attr"`
-	NmgOwner		string	`xml:"nmgowner,attr"`
-	NmgApplication	string	`xml:"nmgapplication,attr"`
+	XMLName        xml.Name `xml:"object"`
+	Label          string   `xml:"label,attr"`
+	Name           string   `xml:"nmgname,attr"`
+	Type           string   `xml:"nmgtype,attr"`
+	OSType         string   `xml:"nmgostype,attr"`
+	ID             string   `xml:"id,attr"`
+	NmgOrg         string   `xml:"nmgorg,attr"`
+	NmgOwner       string   `xml:"nmgowner,attr"`
+	NmgApplication string   `xml:"nmgapplication,attr"`
 }
 
 // ConnectionSt struct containing the connections
@@ -90,17 +90,31 @@ func main() {
 	var esxuser string
 	flag.StringVar(&esxuser, "user", "", "Username for ESX")
 
+	var esxpass string
+	flag.StringVar(&esxpass, "password", "", "Password for ESX")
+
 	flag.Parse()
 	fmt.Println("Debug:", *debug)
 
 	debugenabled = *debug
 
-	fmt.Print("Enter Password: ")
-	bytePassword, err := terminal.ReadPassword(0)
-	if err == nil {
-		fmt.Println("\nPassword typed: " + string(bytePassword))
+	if esxuser == "" {
+		fmt.Print("Enter Username: ")
+		byteUser, err := terminal.ReadPassword(0)
+		if err == nil {
+			fmt.Println("\nError User")
+		}
+		esxuser = string(byteUser)
 	}
-	password := string(bytePassword)
+
+	if esxpass == "" {
+		fmt.Print("Enter Password: ")
+		bytePassword, err := terminal.ReadPassword(0)
+		if err == nil {
+			fmt.Println("\nPassword typed: " + string(bytePassword))
+		}
+		esxpass = string(bytePassword)
+	}
 
 	// Todo: Convert to map
 	type RouterSVISt struct {
@@ -110,14 +124,14 @@ func main() {
 	}
 	// Todo: Convert to map
 	type ServerSt struct {
-		Label       	string
-		ServerName  	string
-		IsOnNetwork 	string
-		OSType      	string
-		ID          	string
-		NmgOrg			string
-		NmgOwner		string
-		NmgApplication	string
+		Label          string
+		ServerName     string
+		IsOnNetwork    string
+		OSType         string
+		ID             string
+		NmgOrg         string
+		NmgOwner       string
+		NmgApplication string
 	}
 	// Todo: Convert to map
 	type ConnectSt struct {
@@ -154,12 +168,12 @@ func main() {
 		 */
 		if mxfile.Diagram.MXGraphModel.Root.ObjectList[i].Type == "server" {
 			tmp := ServerSt{ServerName: mxfile.Diagram.MXGraphModel.Root.ObjectList[i].Name,
-				OSType: mxfile.Diagram.MXGraphModel.Root.ObjectList[i].OSType,
-				ID:     mxfile.Diagram.MXGraphModel.Root.ObjectList[i].ID,
-				Label:  mxfile.Diagram.MXGraphModel.Root.ObjectList[i].Label,
-				NmgOrg: mxfile.Diagram.MXGraphModel.Root.ObjectList[i].NmgOrg,
+				OSType:         mxfile.Diagram.MXGraphModel.Root.ObjectList[i].OSType,
+				ID:             mxfile.Diagram.MXGraphModel.Root.ObjectList[i].ID,
+				Label:          mxfile.Diagram.MXGraphModel.Root.ObjectList[i].Label,
+				NmgOrg:         mxfile.Diagram.MXGraphModel.Root.ObjectList[i].NmgOrg,
 				NmgApplication: mxfile.Diagram.MXGraphModel.Root.ObjectList[i].NmgApplication,
-				NmgOwner: mxfile.Diagram.MXGraphModel.Root.ObjectList[i].NmgOwner }
+				NmgOwner:       mxfile.Diagram.MXGraphModel.Root.ObjectList[i].NmgOwner}
 			support.DebugIt("Adding Entry to ServerList: " + mxfile.Diagram.MXGraphModel.Root.ObjectList[i].Name)
 			ServerList = append(ServerList, tmp)
 		}
@@ -317,31 +331,31 @@ func main() {
 			}
 		}
 		var outfile string
-		outfile = "/tmp/"+ServerList[i].ServerName+".tf"
+		outfile = "/tmp/" + ServerList[i].ServerName + ".tf"
 		var ipaddy string
-		ipaddy = fmt.Sprintf("172.18.37.20%d",i)
+		ipaddy = fmt.Sprintf("172.18.37.20%d", i)
 		fmt.Println(ipaddy)
 		/*
 		 * ipaddres, gatewayaddress and bitmask will need to come from somewhere
 		 */
 		node1 := Comp{"labelname": ServerList[i].Label,
-			"servername":  ServerList[i].ServerName,
-			"networkname": networkname.Name,
+			"servername":     ServerList[i].ServerName,
+			"networkname":    networkname.Name,
 			"gatewayaddress": networkname.Gateway,
-			"bitmask": networkname.Bitmask,
-			"vspherename": vcenter,
-			"dcname": dcname,
-			"vcluster": vcluster,
+			"bitmask":        networkname.Bitmask,
+			"vspherename":    vcenter,
+			"dcname":         dcname,
+			"vcluster":       vcluster,
 			"storagecluster": storecluster,
-			"templatename": templatename,
-			"nmgorg": ServerList[i].NmgOrg,
-			"nmgowner": ServerList[i].NmgOwner,
+			"templatename":   templatename,
+			"nmgorg":         ServerList[i].NmgOrg,
+			"nmgowner":       ServerList[i].NmgOwner,
 			"nmgapplication": ServerList[i].NmgApplication,
-			"ipaddress": ipaddy}
+			"ipaddress":      ipaddy}
 		fmt.Println(node1)
 		ComputeSlice = append(ComputeSlice, node1)
-		err := ottotf.WriteTF(node1,outfile,templatefilename)
+		err := ottotf.WriteTF(node1, outfile, templatefilename)
 		fmt.Println(err)
-		ottotf.RunTF(outfile,ServerList[i].ServerName+".tf",esxuser,password)
+		ottotf.RunTF(outfile, ServerList[i].ServerName+".tf", esxuser, esxpass)
 	}
 }
