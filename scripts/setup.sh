@@ -11,15 +11,27 @@ fi
 # First, where am I 
 # (I'll need you to tell me where ottomate/src is in reference to the ${CWD})
 STARTINGDIR=$1
+STARTINGWITHOUTSRC=`echo ${STARTINGDIR} | sed -e 's;/src;;'`
 
-STARTINGWITHOUTSRC=`echo ${STARTINGDIR} | sed -e ';/src;;'`
+# Now where is go
+GOBINFULL=`which go`
+GOBINDIR=${GOBINFULL%/*}
+GOINSTALLDIR=`echo ${GOBINDIR} | sed -e 's;/bin;;'`
+
+
+# Setup variables
+echo "GOPATH=${STARTINGWITHOUTSRC}"
+export GOPATH=${STARTINGWITHOUTSRC}
+
+echo "GOROOT=${GOINSTALLDIR}"
+export GOROOT=${GOINSTALLDIR}
 
 # Walk through the subdir's in src and go get what we need
-for DIR in $(find /home/ec2-user/environment/ottomate/src/* -type d); do
+for DIR in $(find ${STARTINGDIR}/* -type d); do
   cd ${DIR}
   go get ./...
 done
-
+#
 # Install the required stuff 
 
 # What package manger do we use here?
@@ -30,5 +42,5 @@ for PKGMGR in yum apt-get; do
     PKGR=${PKGMGR}
   fi
 done
-
+#
 echo "${PKGR}"
