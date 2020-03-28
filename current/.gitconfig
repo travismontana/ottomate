@@ -1,0 +1,5 @@
+[user]
+	name = Bob Bomar
+	email = bob@bomar.us
+[credential]
+	helper = manager

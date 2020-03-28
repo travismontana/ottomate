@@ -1,0 +1,80 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
+
+	"github.com/gin-gonic/gin"
+	"gopkg.in/yaml.v2"
+)
+
+var debugenable bool
+
+func processError(err error) {
+	fmt.Println(err)
+	os.Exit(2)
+}
+
+func readFile(cfg *Config, theconfigfile string) {
+	f, err := os.Open(theconfigfile)
+	if err != nil {
+		processError(err)
+	}
+	defer f.Close()
+
+	decoder := yaml.NewDecoder(f)
+	err = decoder.Decode(cfg)
+	if err != nil {
+		processError(err)
+	}
+}
+
+type Config struct {
+	Upload struct {
+		Host string `yaml:"location"`
+	} `yaml:"upload"`
+}
+
+func doWeb() {
+	router := gin.Default()
+	// Set a lower memory limit for multipart forms (default is 32 MiB)
+	router.MaxMultipartMemory = 8 << 20 // 8 MiB
+	router.Static("/", "./public")
+	router.POST("/upload", func(c *gin.Context) {
+		username := c.PostForm("username")
+		password := c.PostForm("password")
+
+		// Source
+		file, err := c.FormFile("file")
+		if err != nil {
+			c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
+			return
+		}
+
+		filename := filepath.Base(file.Filename)
+		if err := c.SaveUploadedFile(file, filename); err != nil {
+			c.String(http.StatusBadRequest, fmt.Sprintf("upload file err: %s", err.Error()))
+			return
+		}
+
+		c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully with fields username=%s and password=%s.", file.Filename, username, password))
+	})
+	router.Run(":8080")
+}
+
+func main() {
+	//TODO: Add reading from a config file
+	//TODO: Add what the config file needs to do
+	/*
+		var theconfigfile string
+		theconfigfile = "ottoconfig/theconfigfile.yml"
+		var cfg Config
+		readFile(&cfg, theconfigfile)
+		fmt.Printf("%+v", cfg)
+	*/
+
+	doWeb()
+	
+}
